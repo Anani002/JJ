@@ -1,162 +1,135 @@
 import os
 
-def effacer_ecran():
-    os.system('cls' if os.name == 'nt' else 'clear')
+# Nom du fichier de sauvegarde
+FICHIER_HISTORIQUE = "historique.txt"
 
-def afficher_banniere():
-    print("╔══════════════════════════════════╗")
-    print("║       CALCULATRICE AVANCÉE       ║")
-    print("║         Version 2.0              ║")
-    print("╚══════════════════════════════════╝")
+# ==============================
+# FONCTIONS DE FICHIER
+# ==============================
 
-def afficher_menu_principal():
-    effacer_ecran()
-    afficher_banniere()
-    print("\n  CATEGORIES D'OPERATIONS\n")
-    print("  1.  Operations de base")
-    print("  2.  Operations avancees")
-    print("  3.  Historique des calculs")
-    print("  4.  Quitter")
-    print("\n" + "-" * 36)
+def sauvegarder(expression, resultat):
+    """Sauvegarde un calcul dans le fichier historique."""
+    with open(FICHIER_HISTORIQUE, "a") as f:
+        f.write(f"{expression} = {resultat}\n")
 
-def afficher_menu_base():
-    effacer_ecran()
-    afficher_banniere()
-    print("\n  OPERATIONS DE BASE\n")
-    print("  1. Addition        (+)")
-    print("  2. Soustraction    (-)")
-    print("  3. Multiplication  (x)")
-    print("  4. Division        (/)")
-    print("  5. Modulo          (%)")
-    print("  6. Retour au menu principal")
-    print("\n" + "-" * 36)
+def lire_historique():
+    """Lit et affiche le contenu du fichier historique."""
+    if not os.path.exists(FICHIER_HISTORIQUE):
+        print("Aucun historique trouve.")
+        return
+    with open(FICHIER_HISTORIQUE, "r") as f:
+        lignes = f.readlines()
+    if not lignes:
+        print("L'historique est vide.")
+    else:
+        print(f"\n-- Historique ({len(lignes)} calcul(s)) --")
+        for i, ligne in enumerate(lignes, 1):
+            print(f"  {i}. {ligne.strip()}")
 
-def afficher_menu_avance():
-    effacer_ecran()
-    afficher_banniere()
-    print("\n  OPERATIONS AVANCEES\n")
-    print("  1. Puissance       (x^n)")
-    print("  2. Racine carree   (sqrt)")
-    print("  3. Valeur absolue  (|x|)")
-    print("  4. Retour au menu principal")
-    print("\n" + "-" * 36)
+def effacer_historique():
+    """Efface le contenu du fichier historique."""
+    with open(FICHIER_HISTORIQUE, "w") as f:
+        f.write("")
+    print("Historique efface avec succes !")
 
-def saisir_nombre(message, accepter_zero=True):
+# ==============================
+# FONCTIONS DE CALCUL
+# ==============================
+
+def addition(a, b):
+    return a + b
+
+def soustraction(a, b):
+    return a - b
+
+def multiplication(a, b):
+    return a * b
+
+def division(a, b):
+    if b == 0:
+        return None
+    return a / b
+
+# ==============================
+# FONCTIONS D'AFFICHAGE
+# ==============================
+
+def afficher_menu():
+    print("\n==============================")
+    print("      CALCULATRICE v2.0      ")
+    print("==============================")
+    print("1. Addition")
+    print("2. Soustraction")
+    print("3. Multiplication")
+    print("4. Division")
+    print("5. Voir l'historique")
+    print("6. Effacer l'historique")
+    print("7. Quitter")
+    print("==============================")
+
+# ==============================
+# FONCTIONS DE SAISIE
+# ==============================
+
+def saisir_nombre(message):
     while True:
         try:
-            valeur = float(input(message))
-            if not accepter_zero and valeur == 0:
-                print("  Ce nombre ne peut pas etre zero.")
-                continue
-            return valeur
+            return float(input(message))
         except ValueError:
-            print("  Entree invalide. Veuillez entrer un nombre.")
+            print("Entree invalide. Veuillez entrer un nombre.")
 
-def saisir_choix(message, options_valides):
+def saisir_choix(options):
     while True:
-        choix = input(message).strip()
-        if choix in options_valides:
+        choix = input("Votre choix : ")
+        if choix in options:
             return choix
-        print(f"  Choix invalide. Options : {', '.join(options_valides)}")
+        print(f"Choix invalide. Entrez un chiffre parmi : {', '.join(options)}")
 
-def afficher_resultat(expression, resultat):
-    print("\n" + "-" * 36)
-    print(f"  Resultat : {expression} = {resultat}")
-    print("-" * 36)
-
-def operations_base(historique):
-    while True:
-        afficher_menu_base()
-        choix = saisir_choix("  Votre choix : ", ["1", "2", "3", "4", "5", "6"])
-
-        if choix == "6":
-            break
-
-        a = saisir_nombre("  Premier nombre  : ")
-        if choix == "4":
-            b = saisir_nombre("  Deuxieme nombre : ", accepter_zero=False)
-        else:
-            b = saisir_nombre("  Deuxieme nombre : ")
-
-        if choix == "1":
-            res = a + b
-            expr = f"{a} + {b}"
-        elif choix == "2":
-            res = a - b
-            expr = f"{a} - {b}"
-        elif choix == "3":
-            res = a * b
-            expr = f"{a} x {b}"
-        elif choix == "4":
-            res = a / b
-            expr = f"{a} / {b}"
-        elif choix == "5":
-            res = a % b
-            expr = f"{a} % {b}"
-
-        afficher_resultat(expr, round(res, 6))
-        historique.append(f"{expr} = {round(res, 6)}")
-        input("\n  Appuyez sur Entree pour continuer...")
-
-def operations_avancees(historique):
-    import math
-    while True:
-        afficher_menu_avance()
-        choix = saisir_choix("  Votre choix : ", ["1", "2", "3", "4"])
-
-        if choix == "4":
-            break
-
-        if choix == "1":
-            a = saisir_nombre("  Base     : ")
-            b = saisir_nombre("  Exposant : ")
-            res = a ** b
-            expr = f"{a} ^ {b}"
-        elif choix == "2":
-            a = saisir_nombre("  Nombre (>= 0) : ")
-            if a < 0:
-                print("  Impossible : racine d'un nombre negatif.")
-                input("\n  Appuyez sur Entree pour continuer...")
-                continue
-            res = math.sqrt(a)
-            expr = f"sqrt({a})"
-        elif choix == "3":
-            a = saisir_nombre("  Nombre : ")
-            res = abs(a)
-            expr = f"|{a}|"
-
-        afficher_resultat(expr, round(res, 6))
-        historique.append(f"{expr} = {round(res, 6)}")
-        input("\n  Appuyez sur Entree pour continuer...")
-
-def afficher_historique(historique):
-    effacer_ecran()
-    afficher_banniere()
-    print("\n  HISTORIQUE DES CALCULS\n")
-    if not historique:
-        print("  Aucun calcul effectue pour l'instant.")
-    else:
-        for i, entree in enumerate(historique, 1):
-            print(f"  {i}. {entree}")
-    print("\n" + "-" * 36)
-    input("\n  Appuyez sur Entree pour continuer...")
+# ==============================
+# PROGRAMME PRINCIPAL
+# ==============================
 
 def main():
-    historique = []
-    while True:
-        afficher_menu_principal()
-        choix = saisir_choix("  Votre choix : ", ["1", "2", "3", "4"])
+    print("Bienvenue dans la Calculatrice v2.0 !")
+    print(f"Les calculs seront sauvegardes dans '{FICHIER_HISTORIQUE}'")
 
-        if choix == "1":
-            operations_base(historique)
-        elif choix == "2":
-            operations_avancees(historique)
-        elif choix == "3":
-            afficher_historique(historique)
-        elif choix == "4":
-            effacer_ecran()
-            print("\n  Merci d'avoir utilise la Calculatrice Avancee. Au revoir !\n")
+    while True:
+        afficher_menu()
+        choix = saisir_choix(["1", "2", "3", "4", "5", "6", "7"])
+
+        if choix in ["1", "2", "3", "4"]:
+            a = saisir_nombre("Premier nombre  : ")
+            b = saisir_nombre("Deuxieme nombre : ")
+
+            if choix == "1":
+                resultat = addition(a, b)
+                expr = f"{a} + {b}"
+            elif choix == "2":
+                resultat = soustraction(a, b)
+                expr = f"{a} - {b}"
+            elif choix == "3":
+                resultat = multiplication(a, b)
+                expr = f"{a} x {b}"
+            elif choix == "4":
+                resultat = division(a, b)
+                expr = f"{a} / {b}"
+                if resultat is None:
+                    print("Erreur : division par zero impossible !")
+                    continue
+
+            resultat = round(resultat, 4)
+            print(f"\nResultat : {expr} = {resultat}")
+            sauvegarder(expr, resultat)
+            print("Calcul sauvegarde dans l'historique.")
+
+        elif choix == "5":
+            lire_historique()
+
+        elif choix == "6":
+            effacer_historique()
+
+        elif choix == "7":
+            print("Au revoir !")
             break
 
-if __name__ == "__main__":
-    main()
+main()
